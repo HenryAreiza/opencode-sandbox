@@ -1,0 +1,10 @@
+# Local configurations and cache
+.env
+*.log
+
+# Python cache (if tested locally)
+__pycache__/
+*.pyc
+
+# Local runtime directories
+.opencode-docker/

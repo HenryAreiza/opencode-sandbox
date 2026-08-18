@@ -1,0 +1,14 @@
+# Development basics & system tools
+sudo
+bash
+curl
+wget
+git
+build-base
+ca-certificates
+shadow
+
+# Python 3 runtime & development headers
+python3
+python3-dev
+py3-pip
