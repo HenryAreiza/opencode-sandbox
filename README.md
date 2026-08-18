@@ -72,6 +72,22 @@ opencode-sandbox "Analyze the architecture in this repo"
 
 ```
 
+### Passing Custom Docker Options
+
+Use `--` as a delimiter to pass any standard `docker run` flags (ports, volumes, resource constraints) directly to Docker:
+
+```bash
+# Expose ports
+opencode-sandbox -p 8080:8000 --
+
+# Limit memory and pass a starting prompt
+opencode-sandbox -m 4g -- "Review this codebase"
+
+# Mount an extra directory
+opencode-sandbox -v /path/to/shared:/shared --
+
+```
+
 ---
 
 ## Customization
