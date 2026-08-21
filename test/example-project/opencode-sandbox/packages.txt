@@ -1,0 +1,5 @@
+# Custom system tools for example project
+curl
+jq
+figlet
+cowsay
