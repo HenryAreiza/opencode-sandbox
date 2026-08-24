@@ -1,0 +1,6 @@
+# Python cache
+__pycache__/
+*.pyc
+
+# Optional: Ignore custom sandbox folder if you don't want to commit it
+# opencode-sandbox/
