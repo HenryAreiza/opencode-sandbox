@@ -16,16 +16,19 @@ RUN ln -sf /usr/bin/python3 /usr/bin/python
 # Build arguments for host UID/GID mapping
 ARG USER_ID=1000
 ARG GROUP_ID=1000
-ARG USER_NAME=opencode
 
-# Create group & user matching host UID/GID, configure bash shell, and grant passwordless sudo
-RUN (getent group ${GROUP_ID} || addgroup -g ${GROUP_ID} ${USER_NAME}) 2>/dev/null || true && \
-    (id -u ${USER_ID} >/dev/null 2>&1 || adduser -u ${USER_ID} -G $(getent group ${GROUP_ID} | cut -d: -f1) -s /bin/bash -D ${USER_NAME}) 2>/dev/null || true && \
-    echo "${USER_NAME} ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/${USER_NAME} && \
-    chmod 0440 /etc/sudoers.d/${USER_NAME}
+# Reuse existing user if UID exists, or create a new user and grant passwordless sudo
+RUN USER_NAME=$(getent passwd ${USER_ID} | cut -d: -f1) || true; \
+    if [ -z "$USER_NAME" ]; then \
+        USER_NAME=opencode; \
+        (getent group ${GROUP_ID} || addgroup -g ${GROUP_ID} ${USER_NAME}) 2>/dev/null || true; \
+        adduser -u ${USER_ID} -G $(getent group ${GROUP_ID} | cut -d: -f1) -s /bin/bash -D ${USER_NAME} 2>/dev/null || true; \
+    fi; \
+    echo "${USER_NAME} ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/sandbox-user && \
+    chmod 0440 /etc/sudoers.d/sandbox-user
 
-USER ${USER_NAME}
-ENV HOME=/home/${USER_NAME}
+USER ${USER_ID}:${GROUP_ID}
+ENV HOME=/home/opencode
 WORKDIR /workspace
 
 ENTRYPOINT ["opencode"]
