@@ -200,7 +200,7 @@ export OLLAMA_BASE_URL="http://host.docker.internal:<PORT>/v1"
 
 ```
 
-The runner automatically forwards these environment variables into the container.
+The runner automatically forwards these environment variables into the container every time the `opencode-sandbox` command is executed.
 
 ---
 

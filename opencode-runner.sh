@@ -186,15 +186,11 @@ else
         CONTAINER_RUNNING="$(docker container inspect -f '{{.State.Running}}' "$CONTAINER_NAME" 2>/dev/null || echo "false")"
         if [ "$CONTAINER_RUNNING" = "true" ]; then
             echo "==> Attaching to running container: $CONTAINER_NAME"
-            exec docker exec -it "$CONTAINER_NAME" opencode "${APP_ARGS[@]}"
+            exec docker exec -it "${ENV_FLAGS[@]}" "$CONTAINER_NAME" opencode "${APP_ARGS[@]}"
         else
             echo "==> Resuming stopped container: $CONTAINER_NAME"
-            if [ ${#APP_ARGS[@]} -gt 0 ]; then
-                docker start "$CONTAINER_NAME" >/dev/null
-                exec docker exec -it "$CONTAINER_NAME" opencode "${APP_ARGS[@]}"
-            else
-                exec docker start -ai "$CONTAINER_NAME"
-            fi
+            docker start "$CONTAINER_NAME" >/dev/null
+            exec docker exec -it "${ENV_FLAGS[@]}" "$CONTAINER_NAME" opencode "${APP_ARGS[@]}"
         fi
     else
         # First-time persistent run
