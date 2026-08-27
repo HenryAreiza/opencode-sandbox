@@ -20,19 +20,24 @@ RUN apt-get update && \
 # Build arguments for host UID/GID mapping
 ARG USER_ID=1000
 ARG GROUP_ID=1000
+ENV USER_NAME=opencode
+ENV HOME=/home/${USER_NAME}
 
-# Reuse existing user (e.g. 'ubuntu' in Ubuntu 24.04) or create 'opencode'
-RUN USER_NAME=$(getent passwd ${USER_ID} | cut -d: -f1) || true; \
-    if [ -z "$USER_NAME" ]; then \
-        USER_NAME=opencode; \
-        groupadd -g ${GROUP_ID} ${USER_NAME} 2>/dev/null || true; \
-        useradd -u ${USER_ID} -g ${GROUP_ID} -m -s /bin/bash ${USER_NAME} 2>/dev/null || true; \
-    fi; \
-    echo "${USER_NAME} ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/sandbox-user && \
-    chmod 0440 /etc/sudoers.d/sandbox-user
+# Create or rename 'opencode' user with defined UID/GID
+RUN EXISTING_USER=$(getent passwd ${USER_ID} | cut -d: -f1) && \
+    if [ -n "$EXISTING_USER" ] && [ "$EXISTING_USER" != "${USER_NAME}" ]; then \
+        userdel -f "$EXISTING_USER" 2>/dev/null || true; \
+    fi && \
+    EXISTING_GROUP=$(getent group ${GROUP_ID} | cut -d: -f1) && \
+    if [ -n "$EXISTING_GROUP" ] && [ "$EXISTING_GROUP" != "${USER_NAME}" ]; then \
+        groupdel "$EXISTING_GROUP" 2>/dev/null || true; \
+    fi && \
+    (getent group ${GROUP_ID} || groupadd -g ${GROUP_ID} ${USER_NAME}) && \
+    (getent passwd ${USER_ID} || useradd -u ${USER_ID} -g ${GROUP_ID} -m -s /bin/bash ${USER_NAME}) && \
+    echo "${USER_NAME} ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/${USER_NAME} && \
+    chmod 0440 /etc/sudoers.d/${USER_NAME}
 
-USER ${USER_ID}:${GROUP_ID}
-ENV HOME=/home/opencode
+USER ${USER_NAME}
 WORKDIR /workspace
 
 ENTRYPOINT ["opencode"]
